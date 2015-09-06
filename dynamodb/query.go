@@ -66,6 +66,27 @@ func (t *Table) CountQuery(attributeComparisons []AttributeComparison) (int64, e
 	return itemCount, nil
 }
 
+func (t *Table) CountQueryTable(q Query) (int, error) {
+	jsonResponse, err := t.Server.queryServer(target("Query"), q)
+	if err != nil {
+		return 0, err
+	}
+
+	json, err := simplejson.NewJson(jsonResponse)
+	if err != nil {
+		return 0, err
+	}
+
+	itemCount, err := json.Get("Count").Int()
+	if err != nil {
+		message := fmt.Sprintf("Unexpected response %s", jsonResponse)
+		return 0, errors.New(message)
+	}
+
+	return itemCount, nil
+
+}
+
 func (t *Table) QueryTable(q Query) ([]map[string]*Attribute, StartKey, error) {
 	jsonResponse, err := t.Server.queryServer(target("Query"), q)
 	if err != nil {
